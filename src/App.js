@@ -8,11 +8,11 @@ class App extends Component {
     super(props);
     this.state = {
       computerCount: 0,
-      prices: {
-        auto: 40,
-      },
-      upgrades: {
-        auto: 0,
+      auto: {
+        unlocked: false,
+        count: 0,
+        price: 50,
+        delay: 1000,
       }
     }
   }
@@ -22,20 +22,37 @@ class App extends Component {
   }
 
   createAutoClicker() {
-    const costGrowth = 1.75;
-    if(this.state.prices.auto <= this.state.computerCount) {
-      this.setState({computerCount: this.state.computerCount-this.state.prices.auto});
-      this.setState({prices: {auto: this.state.prices.auto*costGrowth}})
-      this.setState({upgrades: {auto: this.state.upgrades.auto+1}});
+    const costGrowth = 1.65;
+
+    let auto = this.state.auto;
+
+    if(auto.price <= this.state.computerCount) {
+      auto.price = Math.ceil(auto.price*costGrowth);
+      auto.count = auto.count+1;
+      this.setState({computerCount: this.state.computerCount-auto.price});
+      this.setState({auto: auto});
+    }
+  }
+
+  checkUnlocks() {
+    let auto = this.state.auto;
+    if(this.state.computerCount >= 25 && !auto.unlocked) {
+      auto.unlocked = true
+      this.setState({auto: auto});
     }
   }
 
   canMakeAutoClickers() {
-    if(this.state.computerCount >= 50) {
+    this.checkUnlocks();
+
+    const auto = this.state.auto;
+
+    if(auto.unlocked) {
       return (<AutoClickerModule
               onClick={() => this.createAutoClicker()}
-              price={this.state.prices.auto}
-              count={this.state.upgrades.auto}/>);
+              price={auto.price}
+              count={auto.count}
+              computerCount={this.state.computerCount}/>);
     } else {
       return (<React.Fragment />);
     }
